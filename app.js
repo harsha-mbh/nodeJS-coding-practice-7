@@ -87,8 +87,8 @@ app.get("/matches/:matchId/players", async (request, response) => {
   const getPlayersQuery = `
     SELECT player_details.player_id AS playerId,
     player_details.player_name AS playerName 
-    FROM player_details INNER JOIN player_match_score ON 
-    player_details.player_id = player_match_score.player_id
+    FROM player_match_score LEFT JOIN player_details ON 
+    player_match_score.player_id = player_details.player_id
     WHERE player_match_score.match_id = ${matchId};`;
   const playersArray = await db.all(getPlayersQuery);
   response.send(playersArray);
@@ -103,10 +103,12 @@ SELECT player_details.player_id AS playerId,
     SUM(player_match_score.score) AS totalScore,
     SUM(player_match_score.fours) AS totalFours,
     SUM(player_match_score.sixes) AS totalSixes 
-    FROM player_details INNER JOIN player_match_score ON 
-    player_details.player_id = player_match_score.player_id
+    FROM player_match_score LEFT JOIN player_details ON 
+    player_match_score.player_id = player_details.player_id
     WHERE player_match_score.player_id = ${playerId}
-    GROUP BY ${playerId};`;
+    GROUP BY playerName;`;
   const playerDetails = await db.get(getPlayerScores);
   response.send(playerDetails);
 });
+
+module.exports = app;
